@@ -1,33 +1,125 @@
-# Learning Management System (LMS)
+Learning Management System (LMS)
 
-A web-based Learning Management System (LMS) built with *Node.js, **Express.js, **EJS, and **MySQL*.  
-Students can access courses, take quizzes, and track their progress, while instructors can manage course content.
+ Abhyaas
 
----
 
-## Features
 
-- User authentication for students and instructors
-- Course creation and management
-- Quiz creation and participation
-- Leaderboard for top-performing students
-- Responsive and dynamic UI with EJS templates
-- File uploads for course materials
+A full-stack Learning Management System built with *Node.js, *Express.js, **EJS, and **MySQL/PostgreSQL.  
+
+This LMS allows instructors to create and manage courses, upload materials, and organize quizzes — while students can enroll, access content, and track their learning progress.
+
+
 
 ---
 
-## Tech Stack
 
-- *Backend:* Node.js, Express.js  
-- *Frontend:* EJS (Embedded JavaScript Templates), HTML, CSS, JavaScript  
-- *Database:* MySQL  
-- *Libraries & Tools:* bcryptjs, express-session, multer
+
+- Features:
+
+
+
+# Teacher Features
+
+- Teacher registration and login.
+
+- Create and manage courses.
+
+- Upload learning materials (PDF, PPT, videos, etc.).
+
+- Create and manage quizzes.
+
+- View student scores and leaderboard.
+
+
+
+# Student Features
+
+- Student registration and secure login.
+
+- Browse and enroll in courses.
+
+- Access uploaded learning materials.
+
+- Attempt quizzes and view results view the leaderboard
+
+
+
+
+
+#  General System Features
+
+- Authentication using bcryptjs for password hashing.
+
+- Session management with express-session.
+
+- Secure file uploads using multer.
+
+- Role-based routing (Student / Instructor).
+
+- Dynamic UI with EJS templates.
+
+- Responsive and clean design.
+
+- Supports both MySQL and PostgreSQL databases.
+
+
 
 ---
 
-## Setup Instructions
 
-1. *Clone the repository*
-```bash
+
+# Tech Stack
+
+
+
+| Layer | Technology |
+
+|--------|-------------|
+
+| Frontend | EJS, HTML, CSS |
+
+| Backend | Node.js, Express.js |
+
+| Database |  PostgreSQL |
+
+| Authentication | bcryptjs, express-session |
+
+| File Handling | multer |
+
+| Environment Management | dotenv |
+
+| Deployment | Localhost 5000 |
+
+
+
+---
+
+
+
+# Project Structure
+
+LMS/
+├── public/ # Static assets (CSS, JS, images)
+├── views/ # EJS templates for pages
+├── uploads/ # Uploaded files (course materials)
+├── routes/ # Express route handlers
+├── server.js # Main entry point
+├── package.json # Node dependencies
+├── .env # Environment variables (create this)
+└── LMS.sql # Database schema
+
+---
+
+#  Setup and Installation (Local Machine)
+
+ Clone the Repository
+
+using cmd or bash
+
 git clone https://github.com/jamwalv296/LMS.git
 cd LMS
+
+Once the server runs 
+It can be accessed on   localhost:5000
+
+---x---
