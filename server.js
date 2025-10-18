@@ -88,12 +88,12 @@ async function sendEmailNotification(to, subject, message) {
     const response = await sgMail.send(msg);
 
     // Log full response from SendGrid
-    console.log(`✅ Email sent to ${to}: ${subject}`);
+    console.log(`Email sent to ${to}: ${subject}`);
     console.log('SendGrid response status code:', response[0].statusCode);
     console.log('SendGrid response headers:', response[0].headers);
 
   } catch (error) {
-    console.error(`❌ Error sending email to ${to}:`, error.message);
+    console.error(`Error sending email to ${to}:`, error.message);
 
     // More detailed SendGrid error info
     if (error.response && error.response.body) {
@@ -374,18 +374,18 @@ app.get('/course/:id/assignments', async (req, res) => {
   if (!user) return res.redirect('/login');
 
   try {
-    // 1️⃣ Fetch the course
+    // Fetch the course
     const courseResult = await pool.query('SELECT * FROM courses WHERE id=$1', [id]);
     const course = courseResult.rows[0];
 
-    // 2️⃣ Fetch all assignments for this course
+    // Fetch all assignments for this course
     const assignmentsResult = await pool.query(
       'SELECT * FROM assignments WHERE course_id=$1 ORDER BY created_at DESC',
       [id]
     );
     const assignments = assignmentsResult.rows;
 
-    // 3️⃣ Attach submissions to each assignment
+    // Attach submissions to each assignment
     for (let a of assignments) {
       const submissionsResult = await pool.query(
         'SELECT * FROM submissions WHERE assignment_id=$1',
@@ -394,7 +394,7 @@ app.get('/course/:id/assignments', async (req, res) => {
       a.submissions = submissionsResult.rows; // now each assignment has its submissions
     }
 
-    // 4️⃣ Render page
+    // Render page
     res.render('assignment_page', {
       course,
       assignments,
@@ -431,7 +431,7 @@ app.post('/course/:id/assignments/create', upload.single('file'), async (req, re
       [id, title, description, due_date, file_path, marks]
     );
 
-    // ✅ Notification block
+    // Notification block
     try {
       const students = await pool.query(
         `SELECT u.email
@@ -445,23 +445,24 @@ app.post('/course/:id/assignments/create', upload.single('file'), async (req, re
         students.rows.map(s =>
           sendEmailNotification(
             s.email,
-            '📘 New Assignment Posted',
+            'New Assignment Posted',
             `A new assignment "${title}" has been uploaded in your course.\nDue: ${due_date || 'Not specified'}.`
           )
         )
       );
 
-      console.log(`✅ Notification emails sent for new assignment in course ${id}`);
+      console.log(`Notification emails sent for new assignment in course ${id}`);
     } catch (notifyErr) {
-      console.error('❌ Notification sending failed (assignment):', notifyErr);
+      console.error('Notification sending failed (assignment):', notifyErr);
     }
 
     res.redirect(`/course/${id}/assignments`);
   } catch (err) {
-    console.error('❌ Error creating assignment:', err);
+    console.error('Error creating assignment:', err);
     res.send('Error creating assignment');
   }
 });
+
 
 
 
@@ -531,6 +532,53 @@ app.get('/course/:courseId/assignments/:assignmentId/submissions', async (req, r
     res.send('Error fetching submissions');
   }
 });
+
+
+// Delete assignment
+app.post('/course/:courseId/assignments/:assignmentId/delete', async (req, res) => {
+    const { courseId, assignmentId } = req.params;
+    try {
+        // Optional: check if user is teacher and owns the course
+        await pool.query('DELETE FROM assignments WHERE id = $1', [assignmentId]);
+        res.redirect(`/course/${courseId}/assignments`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error while deleting assignment');
+    }
+});
+
+// Delete a student submission
+app.post('/assignments/:submissionId/delete', async (req, res) => {
+  const submissionId = req.params.submissionId;
+  const userId = req.session.user?.id; // make sure session stores the logged-in user's id
+
+  if (!userId) return res.status(401).send('Please log in to delete your submission.');
+
+  try {
+    const submission = await pool.query(
+      'SELECT * FROM submissions WHERE id=$1 AND student_id=$2',
+      [submissionId, userId]
+    );
+
+    if (submission.rows.length === 0) {
+      return res.status(403).send('Unauthorized or submission not found.');
+    }
+
+    // Delete the submission record
+    await pool.query('DELETE FROM submissions WHERE id=$1', [submissionId]);
+
+    const courseId = req.body.courseId;
+res.redirect(`/course/${courseId}/assignments?role=${req.session.user.role}&userId=${req.session.user.id}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+
+
+
 
 
 // Save grade & feedback (teacher submits form)
@@ -630,7 +678,7 @@ app.post('/course/:id/forum', async (req, res) => {
       [courseId, userId, content, parent_id || null]
     );
 
-    // ✅ Notification block
+    // Notification block
     try {
       const students = await pool.query(
         `SELECT u.email
@@ -644,19 +692,19 @@ app.post('/course/:id/forum', async (req, res) => {
         students.rows.map(s =>
           sendEmailNotification(
             s.email,
-            '💬 New Forum Message',
+            'New Forum Message',
             `A new post was added to the discussion forum of your course.`
           )
         )
       );
-      console.log(`✅ Forum notifications sent for course ${courseId}`);
+      console.log(` Forum notifications sent for course ${courseId}`);
     } catch (notifyErr) {
-      console.error('❌ Notification sending failed (forum):', notifyErr);
+      console.error('Notification sending failed (forum):', notifyErr);
     }
 
     res.redirect(`/course/${courseId}/forum`);
   } catch (err) {
-    console.error('❌ Error posting to forum:', err);
+    console.error('Error posting to forum:', err);
     res.send('Error posting to forum');
   }
 });
@@ -727,7 +775,7 @@ app.post('/course/:id/materials/upload', upload.single('material_file'), async (
       [courseId, material_title, file.filename]
     );
 
-    // ✅ Notification block
+    // Notification block
     try {
       const students = await pool.query(
         `SELECT u.email
@@ -741,23 +789,35 @@ app.post('/course/:id/materials/upload', upload.single('material_file'), async (
         students.rows.map(s =>
           sendEmailNotification(
             s.email,
-            '📚 New Study Material Added',
+            'New Study Material Added',
             `New material "${material_title}" has been uploaded in your course (Course ID: ${courseId}).`
           )
         )
       );
-      console.log(`✅ Material upload notifications sent for course ${courseId}`);
+      console.log(`Material upload notifications sent for course ${courseId}`);
     } catch (notifyErr) {
-      console.error('❌ Notification sending failed (materials):', notifyErr);
+      console.error('Notification sending failed (materials):', notifyErr);
     }
 
     res.redirect(`/course/${courseId}`);
   } catch (err) {
-    console.error('❌ Error uploading material:', err);
+    console.error('Error uploading material:', err);
     res.send('Error uploading material');
   }
 });
 
+//Delete material
+// Delete course material (Teacher)
+app.post('/course/:courseId/materials/:materialId/delete', async (req, res) => {
+    const { courseId, materialId } = req.params;
+    try {
+        await pool.query('DELETE FROM course_materials WHERE id=$1', [materialId]);
+        res.redirect(`/course/${courseId}/materials`);
+    } catch(err) {
+        console.error(err);
+        res.status(500).send('Server error while deleting material');
+    }
+});
 
 
 
@@ -1084,22 +1144,22 @@ app.post('/practice/quiz/:quizId/submit', async (req, res) => {
   const answers = req.body;
 
   try {
-    // 1️⃣ Fetch the quiz
+    //  Fetch the quiz
     const quizRes = await pool.query('SELECT * FROM quizzes WHERE id=$1', [quizId]);
     if (quizRes.rows.length === 0) return res.send('Quiz not found');
     const quiz = quizRes.rows[0];
 
-    // 2️⃣ Fetch questions
+    //  Fetch questions
     const questionsRes = await pool.query('SELECT * FROM quiz_questions WHERE quiz_id=$1', [quizId]);
     const questions = questionsRes.rows;
 
     if (questions.length === 0) return res.send('No questions found for this quiz');
 
-    // 3️⃣ Calculate per-question points
+    //  Calculate per-question points
     const totalPoints = quiz.total_points;
     const perQuestionPoints = totalPoints / questions.length;
 
-    // 4️⃣ Calculate score (can be fractional)
+    //  Calculate score (can be fractional)
     let score = 0;
     const questionsResult = questions.map(q => {
       const isCorrect = answers[q.id] === q.correct_option;
@@ -1113,7 +1173,7 @@ app.post('/practice/quiz/:quizId/submit', async (req, res) => {
       };
     });
 
-    // 5️⃣ Calculate time taken
+    //  Calculate time taken
     const submissionRes = await pool.query(
       'SELECT started_at FROM quiz_submissions WHERE quiz_id=$1 AND student_id=$2',
       [quizId, studentId]
@@ -1122,10 +1182,10 @@ app.post('/practice/quiz/:quizId/submit', async (req, res) => {
     const submittedAt = new Date();
     const timeTaken = startedAt ? Math.floor((submittedAt - startedAt) / 1000) : 0;
 
-    // 6️⃣ Calculate EXP
+    //  Calculate EXP
     const expGained = Math.round(score * 2 + Math.max(0, 60 - timeTaken / 10)); // example formula
 
-    // 7️⃣ Update quiz_submissions (score as NUMERIC)
+    //  Update quiz_submissions (score as NUMERIC)
     await pool.query(
       `INSERT INTO quiz_submissions (quiz_id, student_id, score, submitted_at)
        VALUES ($1,$2,$3,NOW())
@@ -1136,7 +1196,7 @@ app.post('/practice/quiz/:quizId/submit', async (req, res) => {
       [quizId, studentId, score]  // fractional score now works
     );
 
-    // 8️⃣ Update student_total_score
+    //  Update student_total_score
     await pool.query(
       `INSERT INTO student_total_score (student_id, total_score)
        VALUES ($1, $2)
@@ -1150,7 +1210,7 @@ app.post('/practice/quiz/:quizId/submit', async (req, res) => {
       [studentId, score]
     );
 
-    // 9️⃣ Render result
+    //  Render result
     res.render('quiz_result', {
       user: req.session.user,
       quizId,
@@ -1232,7 +1292,7 @@ app.post("/ask-ai", async (req, res) => {
 
 // Run every day at 9:00 AM India time
 cron.schedule('0 9 * * *', async () => {
-  console.log('🕘 Running daily deadline check...');
+  console.log(' Running daily deadline check...');
 
   try {
     const result = await pool.query(
@@ -1244,7 +1304,7 @@ cron.schedule('0 9 * * *', async () => {
     );
 
     if (result.rows.length === 0) {
-      console.log('✅ No assignments due tomorrow.');
+      console.log(' No assignments due tomorrow.');
       return;
     }
 
@@ -1252,15 +1312,15 @@ cron.schedule('0 9 * * *', async () => {
       result.rows.map(row =>
         sendEmailNotification(
           row.email,
-          '⏰ Assignment Due Tomorrow',
+          ' Assignment Due Tomorrow',
           `Reminder: Your assignment "${row.title}" is due tomorrow (${new Date(row.due_date).toDateString()}).`
         )
       )
     );
 
-    console.log(`✅ Sent ${result.rows.length} deadline reminders.`);
+    console.log(` Sent ${result.rows.length} deadline reminders.`);
   } catch (err) {
-    console.error('❌ Error in deadline reminder cron:', err);
+    console.error(' Error in deadline reminder cron:', err);
   }
 }, {
   scheduled: true,
@@ -1299,7 +1359,7 @@ app.post('/course/:courseId/videos/upload', upload.single('video_file'), async (
     const { chapter_title, topic_title, video_title } = req.body;
     const filePath = req.file.filename; // assuming multer saves file to 'uploads/' folder
 
-    // 1️⃣ Check if chapter exists
+    //  Check if chapter exists
     let chapterResult = await pool.query(
       'SELECT * FROM chapters WHERE course_id=$1 AND title=$2',
       [courseId, chapter_title.trim()]
@@ -1317,7 +1377,7 @@ app.post('/course/:courseId/videos/upload', upload.single('video_file'), async (
       chapterId = newChapter.rows[0].id;
     }
 
-    // 2️⃣ Check if topic exists under this chapter
+    //  Check if topic exists under this chapter
     let topicResult = await pool.query(
       'SELECT * FROM topics WHERE chapter_id=$1 AND title=$2',
       [chapterId, topic_title.trim()]
@@ -1335,7 +1395,7 @@ app.post('/course/:courseId/videos/upload', upload.single('video_file'), async (
       topicId = newTopic.rows[0].id;
     }
 
-    // 3️⃣ Insert video
+    //  Insert video
     await pool.query(
       'INSERT INTO videos (topic_id, title, file_path) VALUES ($1, $2, $3)',
       [topicId, video_title.trim(), filePath]
@@ -1350,8 +1410,37 @@ app.post('/course/:courseId/videos/upload', upload.single('video_file'), async (
 
 
 
+app.post('/course/:courseId/videos/:videoId/delete', async (req, res) => {
+    const { courseId, videoId } = req.params;
 
+    try {
+        // Fetch the video to get its file path
+        const videoQuery = await pool.query(
+            'SELECT file_path FROM videos WHERE id = $1',
+            [videoId]
+        );
 
+        if (videoQuery.rowCount === 0) {
+            return res.status(404).send('Video not found');
+        }
+
+        const filePath = videoQuery.rows[0].file_path;
+        const fullPath = path.join(__dirname, 'uploads', filePath);
+
+        // Delete the video file
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+        }
+
+        // Delete the record from the database
+        await pool.query('DELETE FROM videos WHERE id = $1', [videoId]);
+
+        res.redirect(`/course/${courseId}`);
+    } catch (err) {
+        console.error('Error deleting video:', err);
+        res.status(500).send('Server error while deleting video');
+    }
+});
 
 
 

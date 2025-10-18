@@ -378,9 +378,15 @@ function toggleUploadForm() {
                 <div class="material">
                     <strong><%= material.file_name %></strong>
                     <div class="actions">
-                        <a href="#" onclick="showMaterial('/uploads/<%= material.file_path %>')">View</a> |
-                        <a href="/uploads/<%= material.file_path %>" target="_blank" download>Download</a>
-                    </div>
+    <a href="#" onclick="showMaterial('/uploads/<%= material.file_path %>')">View</a> |
+    <a href="/uploads/<%= material.file_path %>" target="_blank" download>Download</a>
+    <% if(user && user.role === 'Teacher'){ %>
+        | <form action="/course/<%= course.id %>/materials/<%= material.id %>/delete" method="POST" style="display:inline;">
+            <button type="submit" onclick="return confirm('Are you sure you want to delete this material?')">Delete</button>
+          </form>
+    <% } %>
+</div>
+
                 </div>
             <% }) %>
         <% } else { %>
