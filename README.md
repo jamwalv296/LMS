@@ -66,6 +66,8 @@ This LMS allows instructors to create and manage courses, upload materials, and 
 
 ---
 
+#Integrated AI Feature: Ask AI 
+
 
 
 # Tech Stack
@@ -90,6 +92,7 @@ This LMS allows instructors to create and manage courses, upload materials, and 
 
 | Deployment | Localhost 5000 |
 
+| Ask Ai | OpenAi API |
 
 
 ---
