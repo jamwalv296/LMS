@@ -440,12 +440,14 @@
                 <button id="toggleUploadVideo" class="dashboard-button" style="width:auto; margin-bottom:15px; background-color: var(--accent-vibrant-blue); color:white;">Upload New Video</button>
                 <div id="uploadVideoForm" style="display:none; margin-top:15px;">
                     <h2>Upload New Chapter/Topic Video</h2>
-                    <form class="upload-form" action="/course/<%= course.id %>/upload" method="POST" enctype="multipart/form-data">
-                        <input type="text" name="chapterTitle" placeholder="Chapter Title" required>
-                        <input type="text" name="topicTitle" placeholder="Topic Title" required>
-                        <input type="file" name="videoFile" accept="video/*" required>
-                        <button type="submit">Upload Video</button>
-                    </form>
+                    <form class="upload-form" action="/course/<%= course.id %>/videos/upload" method="POST" enctype="multipart/form-data">
+    <input type="text" name="chapter_title" placeholder="Chapter Title" required>
+    <input type="text" name="topic_title" placeholder="Topic Title" required>
+    <input type="text" name="video_title" placeholder="Video Title" required>
+    <input type="file" name="video_file" accept="video/*" required>
+    <button type="submit">Upload Video</button>
+</form>
+
                 </div>
             </div>
         <% } %>

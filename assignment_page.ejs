@@ -45,22 +45,70 @@
     button { width: fit-content; padding:10px 20px; border:none; border-radius:var(--border-radius-md); background-color: var(--accent-vibrant-blue); color: #fff; cursor:pointer; font-weight:600; transition: all var(--transition-speed); }
     button:hover { background-color:#5d75e6; transform:translateY(-1px); }
     ul { list-style:none; padding-left:0; }
-    li { background: #fcfdfe; border-radius: var(--border-radius-md); padding:15px 20px; margin-bottom:15px; box-shadow:0 4px 10px rgba(69,98,217,0.08); position:relative; border-left: 4px solid var(--accent-vibrant-blue); }
+    li {
+  background: #fcfdfe;
+  border-radius: var(--border-radius-md);
+  padding:15px 20px;
+  margin-bottom:15px;
+  box-shadow:0 4px 10px rgba(69,98,217,0.08);
+  position:relative;
+  border-left: 4px solid var(--accent-vibrant-blue);
+}
+
     li strong { font-size:1rem; color: var(--text-dark); }
     li a { color: var(--accent-vibrant-blue); text-decoration:none; font-weight:500; }
     li a:hover { text-decoration: underline; }
     .submission-form { margin-top: 10px; }
-    .delete-btn { background-color:#f07b78; margin-left:10px; }
+    .delete-btn {
+  background-color:#f07b78;
+  margin-left:10px;
+  box-shadow: none;
+  position: relative;
+  z-index: 2;
+}
+
     .delete-btn:hover { background-color:#d55a5a; }
     .back-link { display:inline-block; margin-top:20px; color: var(--accent-vibrant-blue); font-weight:500; text-decoration:none; font-size:0.95rem; }
     .back-link:hover { text-decoration:underline; }
 
     /* Material Modal */
-    #materialModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:1000; }
-    #materialModalContent { position:relative; width:80%; max-height:80%; }
+    #materialModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;       /* full width */
+  height: 100vh;      /* full height */
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;      /* small space around the PDF */
+  box-sizing: border-box;
+}
+
+    #materialModalContent {
+  position: relative;
+  width: 90%;         /* wide */
+  max-width: 1200px;  /* cap max width */
+  height: 90%;        /* tall */
+  max-height: 90%;
+  background: white;   /* ensure white background */
+  border-radius: var(--border-radius-md);
+  box-shadow: none;    /* remove any shadow */
+  display: flex;
+  flex-direction: column;
+}
+
     #closeMaterialModal { position:absolute; top:-30px; right:-30px; font-size:3rem; color:white; cursor:pointer; transition: color 0.2s; }
     #closeMaterialModal:hover { color: var(--accent-coral-pink); }
-    #materialFrame { width:100%; height:100%; border:none; border-radius: var(--border-radius-md); background:white; }
+    #materialFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: var(--border-radius-md);
+}
+
 
     @media(max-width:900px){
       .dashboard-layout{flex-direction:column; padding:0 20px; margin:20px auto;}
@@ -159,7 +207,7 @@
 
             <% if(user.role==='Teacher'){ %>
               <a href="/course/<%= course.id %>/assignments/<%= a.id %>/submissions">View Submissions</a>
-              <form action="/course/<%= course.id %>/assignments/<%= a.id %>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
+              <form action="/course/<%= course.id %>/assignments/<%= a.id %>/delete" method="POST" style="display:inline; margin-left: 45px;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
                 <button type="submit" class="delete-btn">Delete Assignment</button>
               </form>
             <% } %>
@@ -185,7 +233,7 @@
                   <p>Your submission has not been graded yet.</p>
                 <% } %>
                 <!-- Student Delete Submission Button -->
-                <form action="/assignments/<%= submitted.id %>/delete" method="POST" style="display:inline;">
+                <form action="/assignments/<%= submitted.id %>/delete" method="POST" style="display:inline; margin-left: 45px;">
   <input type="hidden" name="courseId" value="<%= course.id %>">
   <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete your submission?');">Delete Submission</button>
 </form>
