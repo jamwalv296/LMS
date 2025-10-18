@@ -215,30 +215,33 @@
 
     <div class="dashboard-grid">
       <div class="courses-panel">
-        <h2>Your Enrolled Courses</h2>
+  <h2>Your Enrolled Courses</h2>
 
-        <% if(enrolledCourses.length > 0){ %>
-          <% enrolledCourses.forEach(course => { %>
-            <div class="course-card">
-              <strong><%= course.title %></strong> (Duration: <%= course.duration %>)
-              <p><%= course.description %></p>
-              <p><strong>Total Grade:</strong> 
-                <% if(course.totalMaxPoints > 0){ %>
-                  <%= course.totalGrade %> / <%= course.totalMaxPoints %>
-                <% } else { %>
-                  N/A
-                <% } %>
-              </p>
-              <div class="course-actions">
-                <a href="/course/<%= course.id %>">View</a>
-              </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p>You are not enrolled in any courses yet.</p>
-        <% } %>
-
+  <% if(enrolledCourses.length > 0){ %>
+    <% enrolledCourses.forEach(course => { %>
+      <div class="course-card">
+        <strong><%= course.title %></strong> (Duration: <%= course.duration %>)
+        <p><%= course.description %></p>
+        <p><strong>Total Grade:</strong> 
+          <% if(course.totalMaxPoints > 0){ %>
+            <%= course.totalGrade %> / <%= course.totalMaxPoints %>
+          <% } else { %>
+            N/A
+          <% } %>
+        </p>
+        <div class="course-actions">
+          <a href="/course/<%= course.id %>">View</a>
+          <!-- Unenroll button -->
+          <form action="/course/<%= course.id %>/unenroll" method="POST" style="display:inline; margin-left:10px;" onsubmit="return confirm('Are you sure you want to unenroll from this course?');">
+            <button type="submit" class="delete-btn">Unenroll</button>
+          </form>
+        </div>
       </div>
+    <% }) %>
+  <% } else { %>
+    <p>You are not enrolled in any courses yet.</p>
+  <% } %>
+</div>
 
 
       <div class="courses-panel">
@@ -251,15 +254,15 @@
               <p><%= course.description %></p>
 
               <div class="course-actions">
-                <% if(!enrolledCourseIds.includes(course.id)) { %>
-                  <form action="/course/<%= course.id %>/enroll" method="POST" style="display:inline;">
-  <button type="submit">Enroll Now</button>
-</form>
+  <% if(!enrolledCourseIds.includes(course.id)) { %>
+    <form action="/course/<%= course.id %>/enroll" method="POST" style="display:inline;">
+      <button type="submit">Enroll Now</button>
+    </form>
+  <% } else { %>
+    <span class="already-enrolled">Already Enrolled</span>
+  <% } %>
+</div>
 
-                <% } else { %>
-                  <span class="already-enrolled">Already Enrolled</span>
-                <% } %>
-              </div>
             </div>
           <% }) %>
         <% } else { %>

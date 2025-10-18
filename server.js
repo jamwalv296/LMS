@@ -876,6 +876,30 @@ app.post('/enroll', async (req, res) => {
 });
 
 
+// Unenroll from a course (Student)
+app.post('/course/:courseId/unenroll', async (req, res) => {
+  const courseId = req.params.courseId;
+  const studentId = req.session.user?.id; // fetch from session.user
+
+  if (!studentId) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  try {
+    await pool.query(
+      'DELETE FROM enrollments WHERE course_id = $1 AND student_id = $2',
+      [courseId, studentId]
+    );
+
+    res.redirect('/home');
+  } catch (err) {
+    console.error('Error unenrolling from course:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
 //GAMIFICATION
 
 // ============================
